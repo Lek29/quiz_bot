@@ -1,3 +1,5 @@
+import os
+import random
 from pprint import pprint
 
 
@@ -47,3 +49,19 @@ def load_quiz_data_as_list(file_path):
         print(f"Произошла ошибка при чтении файла: {e}")
 
     return quiz_list
+
+
+def load_random_quiz_data(folder_path):
+    quiz_files = os.listdir(folder_path)
+
+    txt_files = [file for file in quiz_files if file.endswith('.txt')]
+
+    if not txt_files:
+        print(f"Ошибка: в папке '{folder_path}' не найдено .txt файлов.")
+        return []
+
+    random_file = random.choice(txt_files)
+
+    file_path = os.path.join(folder_path, random_file)
+
+    return load_quiz_data_as_list(file_path)
