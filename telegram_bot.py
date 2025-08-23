@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, Filters, Updater, CallbackContext, ConversationHandler
 from environs import Env
 
-from keyboards import get_main_keyboard
+from vk_keyboards import get_main_keyboard
 
 from utils import load_quiz_data_as_list, load_random_quiz_data, get_redis_connection
 
