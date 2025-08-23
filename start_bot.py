@@ -1,14 +1,15 @@
-
+from  enum import Enum, auto
 import random
 from pprint import pprint
+import redis
 
 from telegram import Update
-from telegram.ext import CommandHandler, MessageHandler, filters, Updater, Filters, CallbackContext
+from telegram.ext import CommandHandler, MessageHandler, Filters, Updater, CallbackContext, ConversationHandler
 from environs import Env
 
 from keyboards import get_main_keyboard
 
-from utils import load_quiz_data_as_list, load_random_quiz_data
+from utils import load_quiz_data_as_list, load_random_quiz_data, get_redis_connection
 
 
 env = Env()
@@ -17,48 +18,126 @@ env.read_env()
 TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
 
 
+class States(Enum):
+    NEW_QUESTION = auto()
+    SOLUTION_ATTEMPT = auto()
+
+
 def start(update: Update, context: CallbackContext):
     keyboard = get_main_keyboard()
     update.message.reply_text(
-        'Здравствуйте! Я бот-викторина.',
+        'Здравствуйте! Я бот-викторина. Нажмите "Новый вопрос", чтобы начать.',
         reply_markup=keyboard
     )
-
-def handle_text_message(update: Update, context: CallbackContext):
-    user_text = update.message.text
-
-    if user_text == 'Новый вопрос':
-        handle_new_question(update, context)
-    else:
-        update.message.reply_text(user_text)
-
+    return States.NEW_QUESTION
 
 def handle_new_question(update: Update, context: CallbackContext):
     quiz_items = context.bot_data.get('quiz_questions', [])
 
     if not quiz_items:
         update.message.reply_text('Извините, вопросы не загружены. Попробуйте позже.')
-        return
+        return ConversationHandler.END
 
     random_question = random.choice(quiz_items)
-    update.message.reply_text(random_question['question'])
+    question = random_question['question']
+    answer = random_question['answer']
+
+    r = context.bot_data.get('redis_conn')
+
+    chat_id = update.effective_chat.id
+    r.set(chat_id, answer)
+
+    print(f"Правильный ответ для чата {chat_id}: {answer}") # для теста
+    
+
+    update.message.reply_text(question)
+    return States.SOLUTION_ATTEMPT
+
+
+def handle_solution_attempt(update: Update, context: CallbackContext):
+    user_text = update.message.text
+
+    chat_id = update.effective_chat.id
+    r = context.bot_data.get('redis_conn')
+
+    correct_answer = r.get(chat_id)
+
+
+    if correct_answer:
+        dot_pos = correct_answer.find('.')
+        bracket_pos = correct_answer.find('(')
+
+        if dot_pos != -1 and bracket_pos != -1:
+            end_pos = min(dot_pos, bracket_pos)
+        elif dot_pos != -1:
+            end_pos = dot_pos
+        elif bracket_pos != -1:
+            end_pos = bracket_pos
+        else:
+            end_pos = len(correct_answer)
+
+        clean_answer = correct_answer[:end_pos]
+
+        normalized_user_text = user_text.lower().strip()
+        normalized_clean_answer = clean_answer.lower().strip()
+
+        if normalized_user_text == normalized_clean_answer:
+            update.message.reply_text('Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос».')
+            r.delete(chat_id)
+            return States.NEW_QUESTION
+        else:
+            update.message.reply_text('Неправильно… Попробуешь ещё раз?')
+
+    return States.SOLUTION_ATTEMPT
+
+
+def stop(update, context):
+    """Завершает диалог и сбрасывает состояние."""
+    update.message.reply_text('Спасибо за игру! До свидания.')
+    return ConversationHandler.END
 
 
 def main():
     """Запускает бота."""
+    env = Env()
+    env.read_env()
+    TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
+
+    redis_host = env.str('REDIS_HOST', 'localhost')
+    redis_port = env.int('REDIS_PORT', 6379)
+    redis_password = env.str('REDIS_PASSWORD', '')
 
     updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
 
     dispatcher = updater.dispatcher
 
+    try:
+        redis_conn = redis.Redis(
+                                 host=redis_host,
+                                 port=redis_port,
+                                 password=redis_password,
+                                 db=0,
+                                 decode_responses=True)
+        dispatcher.bot_data['redis_conn'] = redis_conn
+        print("Соединение с Redis успешно установлено!")
+    except redis.exceptions.ConnectionError as e:
+        print(f"Ошибка подключения к Redis: {e}")
+        return
+
     file_name = 'extracted_files'
     dispatcher.bot_data['quiz_questions'] = load_random_quiz_data(file_name)
 
 
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(Filters.text, handle_text_message))
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            States.NEW_QUESTION: [MessageHandler(Filters.regex('^Новый вопрос$'), handle_new_question)],
+            States.SOLUTION_ATTEMPT: [MessageHandler(Filters.text & ~Filters.regex('^Новый вопрос$'), handle_solution_attempt)]
+        },
+        fallbacks=[CommandHandler('stop', stop)]
+    )
 
-
+    dispatcher.add_handler(conv_handler)
     updater.start_polling()
     updater.idle()
 

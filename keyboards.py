@@ -1,3 +1,4 @@
+import redis
 from telegram import ReplyKeyboardMarkup, KeyboardButton
 
 def get_main_keyboard():
@@ -6,3 +7,13 @@ def get_main_keyboard():
         [KeyboardButton('Сдаться'), KeyboardButton('Мой счет')],
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True,  one_time_keyboard=False)
+
+
+def get_redis_connection():
+    try:
+        r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        r.ping()
+        return r
+    except redis.exceptions.ConnectionError as e:
+        print(f"Ошибка подключения к Redis: {e}")
+        return None

@@ -1,5 +1,6 @@
 import os
 import random
+import redis
 from pprint import pprint
 
 
@@ -65,3 +66,13 @@ def load_random_quiz_data(folder_path):
     file_path = os.path.join(folder_path, random_file)
 
     return load_quiz_data_as_list(file_path)
+
+
+def get_redis_connection():
+    try:
+        r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+        r.ping()
+        return r
+    except redis.exceptions.ConnectionError as e:
+        print(f"Ошибка подключения к Redis: {e}")
+        return None
