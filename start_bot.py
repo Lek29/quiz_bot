@@ -91,6 +91,21 @@ def handle_solution_attempt(update: Update, context: CallbackContext):
     return States.SOLUTION_ATTEMPT
 
 
+def handle_surrender(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    r = context.bot_data.get('redis_conn')
+
+    correct_answer = r.get(chat_id)
+
+    if correct_answer:
+        update.message.reply_text(f'Правильный ответ: {correct_answer}')
+        r.delete(chat_id)
+
+        return handle_new_question(update, context)
+    else:
+        update.message.reply_text('Вы ещё не получили вопрос. Нажмите «Новый вопрос», чтобы начать игру.')
+        return States.NEW_QUESTION
+
 def stop(update, context):
     """Завершает диалог и сбрасывает состояние."""
     update.message.reply_text('Спасибо за игру! До свидания.')
@@ -132,7 +147,12 @@ def main():
         entry_points=[CommandHandler('start', start)],
         states={
             States.NEW_QUESTION: [MessageHandler(Filters.regex('^Новый вопрос$'), handle_new_question)],
-            States.SOLUTION_ATTEMPT: [MessageHandler(Filters.text & ~Filters.regex('^Новый вопрос$'), handle_solution_attempt)]
+            States.SOLUTION_ATTEMPT: [
+                MessageHandler(Filters.regex('^Сдаться$'), handle_surrender),
+                MessageHandler(Filters.text & ~Filters.regex('^Новый вопрос$'), handle_solution_attempt),
+
+            ],
+
         },
         fallbacks=[CommandHandler('stop', stop)]
     )
