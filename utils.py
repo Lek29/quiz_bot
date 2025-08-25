@@ -68,7 +68,7 @@ def load_random_quiz_data(folder_path):
     return load_quiz_data_as_list(file_path)
 
 
-def get_redis_connection():
+def get_redis_connection(host, port, password):
     try:
         r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
         r.ping()
