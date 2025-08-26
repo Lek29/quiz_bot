@@ -174,5 +174,5 @@ poetry.toml
 pyrightconfig.json
 
 quiz-questions.zip
-extracted_files/
+#extracted_files/
 .flake8
