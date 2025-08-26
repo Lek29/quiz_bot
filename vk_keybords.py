@@ -1,5 +1,5 @@
-import vk_api
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+
 
 def get_vk_keyboard():
     keyboard = VkKeyboard(one_time=True)

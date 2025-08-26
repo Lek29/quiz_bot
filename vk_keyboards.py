@@ -1,5 +1,6 @@
 import redis
-from telegram import ReplyKeyboardMarkup, KeyboardButton
+from telegram import KeyboardButton, ReplyKeyboardMarkup
+
 
 def get_main_keyboard():
     keyboard = [

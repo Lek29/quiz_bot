@@ -1,7 +1,8 @@
 import os
 import random
-import redis
 from pprint import pprint
+
+import redis
 
 
 def load_quiz_data_as_list(file_path):

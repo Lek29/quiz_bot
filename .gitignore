@@ -175,3 +175,4 @@ pyrightconfig.json
 
 quiz-questions.zip
 extracted_files/
+.flake8

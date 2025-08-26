@@ -1,16 +1,14 @@
-from  enum import Enum, auto
 import random
-from pprint import pprint
+from enum import Enum, auto
+
 import redis
-
-from telegram import Update
-from telegram.ext import CommandHandler, MessageHandler, Filters, Updater, CallbackContext, ConversationHandler
 from environs import Env
+from telegram import Update
+from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
+                          Filters, MessageHandler, Updater)
 
+from utils import load_random_quiz_data
 from vk_keyboards import get_main_keyboard
-
-from utils import load_quiz_data_as_list, load_random_quiz_data, get_redis_connection
-
 
 env = Env()
 env.read_env()
@@ -31,6 +29,7 @@ def start(update: Update, context: CallbackContext):
     )
     return States.NEW_QUESTION
 
+
 def handle_new_question(update: Update, context: CallbackContext):
     quiz_items = context.bot_data.get('quiz_questions', [])
 
@@ -47,9 +46,6 @@ def handle_new_question(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     r.set(chat_id, answer)
 
-    print(f"Правильный ответ для чата {chat_id}: {answer}") # для теста
-    
-
     update.message.reply_text(question)
     return States.SOLUTION_ATTEMPT
 
@@ -61,7 +57,6 @@ def handle_solution_attempt(update: Update, context: CallbackContext):
     r = context.bot_data.get('redis_conn')
 
     correct_answer = r.get(chat_id)
-
 
     if correct_answer:
         dot_pos = correct_answer.find('.')
@@ -106,6 +101,7 @@ def handle_surrender(update: Update, context: CallbackContext):
         update.message.reply_text('Вы ещё не получили вопрос. Нажмите «Новый вопрос», чтобы начать игру.')
         return States.NEW_QUESTION
 
+
 def stop(update, context):
     """Завершает диалог и сбрасывает состояние."""
     update.message.reply_text('Спасибо за игру! До свидания.')
@@ -134,14 +130,13 @@ def main():
                                  db=0,
                                  decode_responses=True)
         dispatcher.bot_data['redis_conn'] = redis_conn
-        print("Соединение с Redis успешно установлено!")
+        print('Соединение с Redis успешно установлено!')
     except redis.exceptions.ConnectionError as e:
-        print(f"Ошибка подключения к Redis: {e}")
+        print(f'Ошибка подключения к Redis: {e}')
         return
 
     file_name = 'extracted_files'
     dispatcher.bot_data['quiz_questions'] = load_random_quiz_data(file_name)
-
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
