@@ -135,8 +135,20 @@ def main():
         print(f'Ошибка подключения к Redis: {e}')
         return
 
-    file_name = 'extracted_files'
-    dispatcher.bot_data['quiz_questions'] = load_random_quiz_data(file_name)
+    folder_path = 'extracted_files'
+
+    try:
+        quiz_questions = load_random_quiz_data(folder_path)
+        if not quiz_questions:
+            print("Ошибка: В файлах викторины не найдено ни одного вопроса.")
+            return
+        dispatcher.bot_data['quiz_questions'] = quiz_questions
+    except FileNotFoundError as e:
+        print(f'Ошибка: {e}')
+        return
+    except Exception as e:
+        print(f'Произошла непредвиденная ошибка при загрузке вопросов: {e}')
+        return
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
