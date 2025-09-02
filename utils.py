@@ -1,6 +1,5 @@
 import os
 import random
-from pprint import pprint
 
 import redis
 
@@ -11,7 +10,6 @@ def load_quiz_data_as_list(file_path):
     Каждый словарь содержит ключи "question" и "answer".
     """
     quiz_list = []
-
 
     with open(file_path, 'r', encoding='koi8-r') as file:
         content = file.read()
@@ -26,10 +24,8 @@ def load_quiz_data_as_list(file_path):
             if answer_label_pos == -1:
                 continue
 
-
             question_start_pos = full_block.find(':') + 1
             question_text = full_block[question_start_pos:answer_label_pos].strip()
-
 
             answer_block_start = answer_label_pos + len('\nОтвет:')
             answer_text_block = full_block[answer_block_start:].strip()
@@ -52,21 +48,15 @@ def load_random_quiz_data(folder_path):
     txt_files = [file for file in quiz_files if file.endswith('.txt')]
 
     if not txt_files:
-        print(f"Ошибка: в папке '{folder_path}' не найдено .txt файлов.")
-        return []
+        raise FileNotFoundError(f"Ошибка: в папке '{folder_path}' не найдено .txt файлов.")
 
     random_file = random.choice(txt_files)
-
     file_path = os.path.join(folder_path, random_file)
 
     return load_quiz_data_as_list(file_path)
 
 
 def get_redis_connection(host, port, password):
-    try:
-        r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
-        r.ping()
-        return r
-    except redis.exceptions.ConnectionError as e:
-        print(f"Ошибка подключения к Redis: {e}")
-        return None
+    r = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    r.ping()
+    return r

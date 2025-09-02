@@ -1,4 +1,5 @@
 import random
+import glob
 
 import redis
 import vk_api
@@ -6,7 +7,7 @@ from environs import Env
 from vk_api.longpoll import VkEventType, VkLongPoll
 from vk_api.utils import get_random_id
 
-from utils import get_redis_connection, load_random_quiz_data
+from utils import get_redis_connection, load_random_quiz_data, load_quiz_data_as_list
 from vk_keybords import get_vk_keyboard
 
 
@@ -31,7 +32,22 @@ def main():
         print(f'Ошибка подключения к Redis: {e}')
         return
 
-    quiz_questions = load_random_quiz_data('extracted_files')
+    folder_path = 'extracted_files'
+    try:
+        file_paths = glob.glob(f"{folder_path}/*.txt")
+        quiz_questions = []
+        for file_path in file_paths:
+            quiz_questions.extend(load_quiz_data_as_list(file_path))
+
+        if not quiz_questions:
+            print("Ошибка: В файлах викторины не найдено ни одного вопроса.")
+            return
+    except FileNotFoundError:
+        print(f"Ошибка: Не удалось найти файлы викторины в папке {folder_path}.")
+        return
+    except Exception as e:
+        print(f"Произошла ошибка при загрузке вопросов: {e}")
+        return
 
     print('Бот для ВКонтакте запущен. Ожидание сообщений...')
 
