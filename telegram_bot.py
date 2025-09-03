@@ -36,10 +36,10 @@ def handle_new_question(update: Update, context: CallbackContext):
     question = random_question['question']
     answer = random_question['answer']
 
-    r = context.bot_data.get('redis_conn')
+    redis_conn = context.bot_data.get('redis_conn')
 
     chat_id = update.effective_chat.id
-    r.set(chat_id, answer)
+    redis_conn.set(chat_id, answer)
 
     update.message.reply_text(question)
     return States.SOLUTION_ATTEMPT
@@ -49,9 +49,9 @@ def handle_solution_attempt(update: Update, context: CallbackContext):
     user_text = update.message.text
 
     chat_id = update.effective_chat.id
-    r = context.bot_data.get('redis_conn')
+    redis_conn = context.bot_data.get('redis_conn')
 
-    correct_answer = r.get(chat_id)
+    correct_answer = redis_conn.get(chat_id)
 
     if correct_answer:
         dot_pos = correct_answer.find('.')
@@ -73,7 +73,7 @@ def handle_solution_attempt(update: Update, context: CallbackContext):
 
         if normalized_user_text == normalized_clean_answer:
             update.message.reply_text('Правильно! Поздравляю! Для следующего вопроса нажми «Новый вопрос».')
-            r.delete(chat_id)
+            redis_conn.delete(chat_id)
             return States.NEW_QUESTION
         else:
             update.message.reply_text('Неправильно… Попробуешь ещё раз?')
@@ -83,13 +83,13 @@ def handle_solution_attempt(update: Update, context: CallbackContext):
 
 def handle_surrender(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
-    r = context.bot_data.get('redis_conn')
+    redis_conn = context.bot_data.get('redis_conn')
 
-    correct_answer = r.get(chat_id)
+    correct_answer = redis_conn.get(chat_id)
 
     if correct_answer:
         update.message.reply_text(f'Правильный ответ: {correct_answer}')
-        r.delete(chat_id)
+        redis_conn.delete(chat_id)
 
         return handle_new_question(update, context)
     else:
