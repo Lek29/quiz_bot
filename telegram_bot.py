@@ -7,13 +7,8 @@ from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler, Updater)
 
-from keyboards import get_main_keyboard, get_vk_keyboard
+from keyboards import get_main_keyboard
 from utils import load_random_questions
-
-env = Env()
-env.read_env()
-
-TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
 
 
 class States(Enum):
