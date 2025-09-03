@@ -42,7 +42,7 @@ def load_quiz_questions(file_path):
     return quiz_list
 
 
-def load_random_quiz_questions(folder_path):
+def load_random_questions(folder_path):
     quiz_files = os.listdir(folder_path)
 
     txt_files = [file for file in quiz_files if file.endswith('.txt')]

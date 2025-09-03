@@ -7,7 +7,7 @@ from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler, Updater)
 
-from utils import load_random_quiz_questions
+from utils import load_random_questions
 from keyboards import get_vk_keyboard, get_main_keyboard
 
 env = Env()
@@ -138,7 +138,7 @@ def main():
     folder_path = 'extracted_files'
 
     try:
-        quiz_questions = load_random_quiz_questions(folder_path)
+        quiz_questions = load_random_questions(folder_path)
         if not quiz_questions:
             print("Ошибка: В файлах викторины не найдено ни одного вопроса.")
             return
