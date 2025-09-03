@@ -7,8 +7,8 @@ from telegram import Update
 from telegram.ext import (CallbackContext, CommandHandler, ConversationHandler,
                           Filters, MessageHandler, Updater)
 
+from keyboards import get_main_keyboard, get_vk_keyboard
 from utils import load_random_questions
-from keyboards import get_vk_keyboard, get_main_keyboard
 
 env = Env()
 env.read_env()

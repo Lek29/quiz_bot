@@ -1,5 +1,5 @@
+from telegram import KeyboardButton, ReplyKeyboardMarkup
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-import redis
 
 
 def get_vk_keyboard():
@@ -12,9 +12,6 @@ def get_vk_keyboard():
     keyboard.add_button('Мой счёт', color=VkKeyboardColor.SECONDARY)
 
     return keyboard
-
-
-from telegram import KeyboardButton, ReplyKeyboardMarkup
 
 
 def get_main_keyboard():
