@@ -107,13 +107,13 @@ def main():
     """Запускает бота."""
     env = Env()
     env.read_env()
-    TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN')
+    telegram_bot_token = env.str('TELEGRAM_BOT_TOKEN')
 
     redis_host = env.str('REDIS_HOST', 'localhost')
     redis_port = env.int('REDIS_PORT', 6379)
     redis_password = env.str('REDIS_PASSWORD', '')
 
-    updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
+    updater = Updater(telegram_bot_token, use_context=True)
 
     dispatcher = updater.dispatcher
 
