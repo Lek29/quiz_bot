@@ -4,7 +4,7 @@ import random
 import redis
 
 
-def load_quiz_data_as_list(file_path):
+def load_quiz_questions(file_path):
     """
     Загружает вопросы и ответы из файла и возвращает их в виде списка словарей.
     Каждый словарь содержит ключи "question" и "answer".
@@ -42,7 +42,7 @@ def load_quiz_data_as_list(file_path):
     return quiz_list
 
 
-def load_random_quiz_data(folder_path):
+def load_random_quiz_questions(folder_path):
     quiz_files = os.listdir(folder_path)
 
     txt_files = [file for file in quiz_files if file.endswith('.txt')]
@@ -53,7 +53,7 @@ def load_random_quiz_data(folder_path):
     random_file = random.choice(txt_files)
     file_path = os.path.join(folder_path, random_file)
 
-    return load_quiz_data_as_list(file_path)
+    return load_quiz_questions(file_path)
 
 
 def get_redis_connection(host, port, password):

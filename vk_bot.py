@@ -7,8 +7,8 @@ from environs import Env
 from vk_api.longpoll import VkEventType, VkLongPoll
 from vk_api.utils import get_random_id
 
-from utils import get_redis_connection,  load_quiz_data_as_list
-from vk_keyboards import get_vk_keyboard
+from utils import get_redis_connection,  load_quiz_questions
+from keyboards import get_vk_keyboard
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
         file_paths = glob.glob(f"{folder_path}/*.txt")
         quiz_questions = []
         for file_path in file_paths:
-            quiz_questions.extend(load_quiz_data_as_list(file_path))
+            quiz_questions.extend(load_quiz_questions(file_path))
 
         if not quiz_questions:
             print("Ошибка: В файлах викторины не найдено ни одного вопроса.")
