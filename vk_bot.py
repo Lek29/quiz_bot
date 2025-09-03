@@ -7,8 +7,8 @@ from environs import Env
 from vk_api.longpoll import VkEventType, VkLongPoll
 from vk_api.utils import get_random_id
 
-from utils import get_redis_connection, load_random_quiz_data, load_quiz_data_as_list
-from vk_keybords import get_vk_keyboard
+from utils import get_redis_connection,  load_quiz_data_as_list
+from vk_keyboards import get_vk_keyboard
 
 
 def main():
