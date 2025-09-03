@@ -37,7 +37,6 @@ def handle_surrender(session, user_id, redis_conn, correct_answer, quiz_question
         send_message(session, user_id, 'Вы ещё не получили вопрос. Нажмите «Новый вопрос», чтобы начать игру.', main_keyboard)
 
 
-
 def handle_solution_attempt(session, user_id, redis_conn, user_text, correct_answer, main_keyboard):
     dot_pos = correct_answer.find('.')
     bracket_pos = correct_answer.find('(')
@@ -84,19 +83,19 @@ def main():
     folder_path = 'extracted_files'
 
     try:
-        file_paths = glob.glob(f"{folder_path}/*.txt")
+        file_paths = glob.glob(f'{folder_path}/*.txt')
         quiz_questions = []
         for file_path in file_paths:
             quiz_questions.extend(load_quiz_questions(file_path))
 
         if not quiz_questions:
-            print("Ошибка: В файлах викторины не найдено ни одного вопроса.")
+            print('Ошибка: В файлах викторины не найдено ни одного вопроса.')
             return
     except FileNotFoundError:
-        print(f"Ошибка: Не удалось найти файлы викторины в папке {folder_path}.")
+        print(f'Ошибка: Не удалось найти файлы викторины в папке {folder_path}.')
         return
     except Exception as e:
-        print(f"Произошла ошибка при загрузке вопросов: {e}")
+        print(f'Произошла ошибка при загрузке вопросов: {e}')
         return
 
     print('Бот для ВКонтакте запущен. Ожидание сообщений...')

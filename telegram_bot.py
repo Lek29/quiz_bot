@@ -135,7 +135,7 @@ def main():
     try:
         quiz_questions = load_random_questions(folder_path)
         if not quiz_questions:
-            print("Ошибка: В файлах викторины не найдено ни одного вопроса.")
+            print('Ошибка: В файлах викторины не найдено ни одного вопроса.')
             return
         dispatcher.bot_data['quiz_questions'] = quiz_questions
     except FileNotFoundError as e:

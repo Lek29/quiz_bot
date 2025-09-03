@@ -31,11 +31,10 @@ def load_quiz_questions(file_path):
             answer_text_block = full_block[answer_block_start:].strip()
             answer = answer_text_block.split('\n')[0].strip()
 
-
             if question_text and answer:
                 quiz_item = {
-                    "question": question_text,
-                    "answer": answer
+                    'question': question_text,
+                    'answer': answer
                 }
                 quiz_list.append(quiz_item)
 
